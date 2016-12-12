@@ -17,7 +17,7 @@ def main():
 
 def getlyrics():
     try:
-        info = getinfo2();
+        info = getdbusinfo();
         artist = info[0];
         track = info[1];
     except:
@@ -25,9 +25,9 @@ def getlyrics():
         return None;
 
     try:
-        #json = getjson(artist, track);
-        #newurl = json[0]["url"];
-        newurl = "http://www.azlyrics.com/lyrics/marilynmanson/sweetdreamsaremadeofthis.html";
+        track = ''.join([i for i in track if (i.isalnum())]).lower();
+        artist = ''.join([i for i in artist if (i.isalnum())]).lower();
+        newurl = "http://www.azlyrics.com/lyrics/" + artist + "/" + track + ".html";
         lyrics = getLyricsFromPage(newurl);
     except:
         print("Could not get Lyrics for {0} by {1}.".format(track, artist));
@@ -44,7 +44,7 @@ def getlyrics():
 #    out = " ".join(out);
 #    out = out.split(" - ", 1);
 #    return out;
-def getinfo2():
+def getdbusinfo():
     bus        = dbus.SessionBus()
     dbusobject = bus.get_object('org.mpris.MediaPlayer2.spotify','/org/mpris/MediaPlayer2')
     promanager = dbus.Interface(dbusobject, 'org.freedesktop.DBus.Properties')
@@ -87,7 +87,6 @@ class Window(QtGui.QWidget):
     def __init__(self):
         super(Window, self).__init__();
         #self.resizeEvent = onResize
-        self.setWindowOpacity(0.9);
         self.setStyleSheet("background-color: #0A050A;");
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint);
         self.spawn();
@@ -96,6 +95,11 @@ class Window(QtGui.QWidget):
         self.timer = QtCore.QTimer();
         self.timer.timeout.connect(self.tick)
         self.timer.start(500);
+
+        self.setWindowOpacity(0.8);
+
+        #self.setAttribute(QtCore.Qt.WA_NoSystemBackground, True);
+        #self.setAttribute(QtCore.Qt.WA_TranslucentBackground);
 
         self.show();
 
@@ -168,7 +172,7 @@ class Window(QtGui.QWidget):
         self.btn_maximize.setGeometry(self.width() - 100, 0, 50, 50)
 
     def tick(self):
-        info = getinfo2();
+        info = getdbusinfo();
         if (info[0] != self.lastinfo[0]) or (info[1] != self.lastinfo[1]):
             self.startThread();
             self.lbl_title.setText(info[1]);
@@ -182,7 +186,8 @@ class Window(QtGui.QWidget):
             if lyrics == "" or lyrics is None:
                 lyrics = "Could not get lyrics ;_;"
             else:
-                lyrics = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + lyrics + "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+                lyrics = ".\n\n\n\n\n" + lyrics + "\n\n\n\n\n.";
+                lyrics = lyrics.replace("<br>", "").replace("</div>", "");
             self.lbl_lyrics.setText(lyrics);
 
     def startThread(self):
