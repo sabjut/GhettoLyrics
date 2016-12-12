@@ -7,8 +7,6 @@ import dbus;
 from multiprocessing.pool import ThreadPool
 from PyQt4 import QtGui, QtCore;
 
-APIKEY = "c5a4732113e338e2d5c503859e412b"
-
 def main():
     #lyrics = getlyrics()
     app = QtGui.QApplication(sys.argv);
@@ -25,6 +23,8 @@ def getlyrics():
         return None;
 
     try:
+        track = track.split("(")[0];
+        track = track.split("[")[0];
         track = ''.join([i for i in track if (i.isalnum())]).lower();
         artist = ''.join([i for i in artist if (i.isalnum())]).lower();
         newurl = "http://www.azlyrics.com/lyrics/" + artist + "/" + track + ".html";
